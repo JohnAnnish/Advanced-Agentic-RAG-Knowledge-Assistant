@@ -21,10 +21,13 @@
 <body class="bg-gray-50 h-screen flex flex-col font-sans">
     
     <!-- Navbar -->
-    <nav class="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center">
+    <nav class="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center relative">
         <div class="flex items-center space-x-2">
             <i class="fas fa-robot text-2xl"></i>
-            <h1 class="text-xl font-bold">Agentic RAG Assistant</h1>
+            <h1 class="text-xl font-bold flex items-center">
+                Agentic RAG Assistant
+                <span id="demoBadge" class="hidden bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded ml-3 animate-pulse">DEMO MODE</span>
+            </h1>
         </div>
         <button onclick="toggleSettings()" class="hover:bg-blue-700 p-2 rounded transition">
             <i class="fas fa-cog"></i> Settings
@@ -76,7 +79,8 @@
     </div>
 
     <script>
-        // Load API URL from localStorage if it exists
+        let isDemoMode = false;
+
         document.addEventListener('DOMContentLoaded', () => {
             const savedUrl = localStorage.getItem('rag_api_url');
             if (savedUrl) document.getElementById('apiUrl').value = savedUrl;
@@ -92,6 +96,10 @@
             localStorage.setItem('rag_api_url', url);
             showSettingsMsg('Settings saved!', 'text-green-600');
             setTimeout(() => toggleSettings(), 1000);
+            
+            // Reset demo mode on new URL save
+            isDemoMode = false;
+            document.getElementById('demoBadge').classList.add('hidden');
         }
 
         function showSettingsMsg(text, colorClass) {
@@ -105,16 +113,20 @@
             return document.getElementById('apiUrl').value.replace(/\/$/, "");
         }
 
+        function enableDemoMode() {
+            isDemoMode = true;
+            document.getElementById('demoBadge').classList.remove('hidden');
+        }
+
         function addMessage(text, isUser = false) {
             const list = document.getElementById('messageList');
             const div = document.createElement('div');
-            div.className = `flex items-start ${isUser ? 'justify-end' : ''}`;
+            div.className = `flex items-start ${isUser ? 'justify-end' : ''} animate-fade-in-up`;
             
             const iconHTML = isUser ? '' : `<div class="bg-blue-100 rounded-full p-3 mr-3"><i class="fas fa-robot text-blue-600"></i></div>`;
             const contentClass = isUser ? 'bg-blue-600 text-white' : 'bg-white border text-gray-800';
             const extraMargins = isUser ? 'ml-3' : '';
 
-            // Basic Markdown to HTML conversion for bold and line breaks
             let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             formattedText = formattedText.replace(/\n/g, '<br>');
 
@@ -155,6 +167,7 @@
             btn.disabled = true;
 
             try {
+                if (isDemoMode) throw new Error("Force Demo");
                 const response = await fetch(`${getApiUrl()}/ingest`, { method: 'POST' });
                 const data = await response.json();
                 if(data.status === 'error') {
@@ -163,7 +176,8 @@
                     showSettingsMsg(`Success! Ingested ${data.documents} documents.`, 'text-green-600');
                 }
             } catch (error) {
-                showSettingsMsg('Connection error. Is the backend URL correct and running?', 'text-red-600');
+                enableDemoMode();
+                showSettingsMsg('Backend offline. Demo Mode activated. Simulated 8 documents ingested.', 'text-orange-500');
             } finally {
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
@@ -181,6 +195,7 @@
             addLoader();
 
             try {
+                if (isDemoMode) throw new Error("Force Demo");
                 const response = await fetch(`${getApiUrl()}/ask`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -193,8 +208,22 @@
                 removeLoader();
                 addMessage(data.answer);
             } catch (error) {
-                removeLoader();
-                addMessage('⚠️ Sorry, I could not connect to the backend. Please make sure the API URL is correct in the Settings, and the backend is running.', false);
+                enableDemoMode();
+                
+                // Simulate AI processing time
+                setTimeout(() => {
+                    removeLoader();
+                    
+                    const fakeAnswers = [
+                        "**[DEMO MODE]** Based on the **HR Employee Handbook** (Page 4), employees are entitled to 20 days of Paid Time Off (PTO) per year. \n\n*(Note: The live backend is currently asleep, so this is a simulated response!)*",
+                        "**[DEMO MODE]** According to the **IT Security Policy**, all passwords must be at least 12 characters long and rotated every 90 days.\n\n*(Note: The live backend is currently asleep, so this is a simulated response!)*",
+                        "**[DEMO MODE]** I found relevant information in the **Finance Expense Policy**. All travel reimbursements must be submitted within 30 days of the trip.\n\n*(Note: The live backend is currently asleep, so this is a simulated response!)*",
+                        "**[DEMO MODE]** The **Benefits Handbook** states that health insurance coverage begins on the first day of the month following your hire date.\n\n*(Note: The live backend is currently asleep, so this is a simulated response!)*"
+                    ];
+                    
+                    const randomAnswer = fakeAnswers[Math.floor(Math.random() * fakeAnswers.length)];
+                    addMessage(randomAnswer);
+                }, 1500);
             } finally {
                 input.disabled = false;
                 input.focus();
