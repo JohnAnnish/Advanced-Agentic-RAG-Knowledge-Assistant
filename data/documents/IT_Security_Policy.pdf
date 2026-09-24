@@ -1,0 +1,105 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 1472 >>
+stream
+BT
+/F1 10 Tf
+50 790 Td
+/F2 12 Tf
+(NORTHSTAR TECHNOLOGIES PVT. LTD.) Tj
+/F1 10 Tf
+0 -18 Td
+/F2 12 Tf
+(SECURITY POLICY) Tj
+/F1 10 Tf
+0 -18 Td
+(Department: Information Technology   |   Document Type: Security Policy   |   Effective) Tj
+0 -14 Td
+(Year: 2026) Tj
+0 -14 Td
+(Version 1.0   |   Owner: Functional Department   |   Review Cycle: Annual) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+/F2 12 Tf
+(PASSWORD REQUIREMENTS) Tj
+/F1 10 Tf
+0 -18 Td
+(Passwords must be at least 12 characters and should be unique to company systems. Employees) Tj
+0 -14 Td
+(must not share passwords. Multi-factor authentication is required for systems that support) Tj
+0 -14 Td
+(it.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+/F2 12 Tf
+(DEVICE SECURITY) Tj
+/F1 10 Tf
+0 -18 Td
+(Company laptops must use approved endpoint protection, automatic screen locking, and current) Tj
+0 -14 Td
+(operating-system security updates.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+/F2 12 Tf
+(PHISHING) Tj
+/F1 10 Tf
+0 -18 Td
+(Employees must treat unexpected links, attachments, login requests, and payment instructions) Tj
+0 -14 Td
+(with caution.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+/F2 12 Tf
+(ACCESS CONTROL) Tj
+/F1 10 Tf
+0 -18 Td
+(Access is granted according to job responsibilities and least-privilege principles.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+/F2 12 Tf
+(INCIDENT REPORTING) Tj
+/F1 10 Tf
+0 -18 Td
+(Suspected security incidents must be reported immediately to the security team.) Tj
+0 -14 Td
+() Tj
+0 -14 Td
+(CONFIDENTIAL - INTERNAL COMPANY POLICY DOCUMENT) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000251 00000 n 
+0000001775 00000 n 
+0000001845 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+1920
+%%EOF
