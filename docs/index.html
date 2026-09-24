@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic RAG Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3498db;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50 h-screen flex flex-col font-sans">
+    
+    <!-- Navbar -->
+    <nav class="bg-blue-600 text-white p-4 shadow-md flex justify-between items-center">
+        <div class="flex items-center space-x-2">
+            <i class="fas fa-robot text-2xl"></i>
+            <h1 class="text-xl font-bold">Agentic RAG Assistant</h1>
+        </div>
+        <button onclick="toggleSettings()" class="hover:bg-blue-700 p-2 rounded transition">
+            <i class="fas fa-cog"></i> Settings
+        </button>
+    </nav>
+
+    <!-- Settings Panel (Hidden by default) -->
+    <div id="settingsPanel" class="hidden bg-white border-b shadow-sm p-4 animate-fade-in-down">
+        <div class="max-w-3xl mx-auto flex flex-col sm:flex-row items-end space-y-2 sm:space-y-0 sm:space-x-4">
+            <div class="flex-1 w-full">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Backend API URL</label>
+                <input type="text" id="apiUrl" placeholder="e.g. https://agentic-rag-api.onrender.com" 
+                    class="w-full border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                    value="http://localhost:8000">
+            </div>
+            <button onclick="saveSettings()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full sm:w-auto">
+                Save & Connect
+            </button>
+            <button onclick="ingestData()" id="ingestBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 w-full sm:w-auto flex items-center justify-center">
+                <i class="fas fa-database mr-2"></i> Ingest Data
+            </button>
+        </div>
+        <p id="settingsMsg" class="text-sm text-center mt-2 hidden"></p>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6" id="chatBox">
+        <div class="max-w-3xl mx-auto space-y-4" id="messageList">
+            <!-- Welcome Message -->
+            <div class="flex items-start">
+                <div class="bg-blue-100 rounded-full p-3 mr-3"><i class="fas fa-robot text-blue-600"></i></div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm text-gray-800 max-w-[85%]">
+                    Hello! I am your Advanced Agentic RAG Knowledge Assistant. Please enter your Render backend URL in the Settings above, run an initial Ingest, and then ask me anything!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Area -->
+    <div class="bg-white border-t p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div class="max-w-3xl mx-auto relative">
+            <input type="text" id="userInput" placeholder="Ask a question about the documents..." 
+                class="w-full border border-gray-300 rounded-full py-3 pl-4 pr-12 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm"
+                onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()" id="sendBtn" class="absolute right-2 top-2 bg-blue-600 text-white rounded-full p-2 w-10 h-10 flex items-center justify-center hover:bg-blue-700 transition">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Load API URL from localStorage if it exists
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedUrl = localStorage.getItem('rag_api_url');
+            if (savedUrl) document.getElementById('apiUrl').value = savedUrl;
+        });
+
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        function saveSettings() {
+            const url = document.getElementById('apiUrl').value.replace(/\/$/, "");
+            localStorage.setItem('rag_api_url', url);
+            showSettingsMsg('Settings saved!', 'text-green-600');
+            setTimeout(() => toggleSettings(), 1000);
+        }
+
+        function showSettingsMsg(text, colorClass) {
+            const msg = document.getElementById('settingsMsg');
+            msg.textContent = text;
+            msg.className = `text-sm text-center mt-2 ${colorClass}`;
+            msg.classList.remove('hidden');
+        }
+
+        function getApiUrl() {
+            return document.getElementById('apiUrl').value.replace(/\/$/, "");
+        }
+
+        function addMessage(text, isUser = false) {
+            const list = document.getElementById('messageList');
+            const div = document.createElement('div');
+            div.className = `flex items-start ${isUser ? 'justify-end' : ''}`;
+            
+            const iconHTML = isUser ? '' : `<div class="bg-blue-100 rounded-full p-3 mr-3"><i class="fas fa-robot text-blue-600"></i></div>`;
+            const contentClass = isUser ? 'bg-blue-600 text-white' : 'bg-white border text-gray-800';
+            const extraMargins = isUser ? 'ml-3' : '';
+
+            // Basic Markdown to HTML conversion for bold and line breaks
+            let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            formattedText = formattedText.replace(/\n/g, '<br>');
+
+            div.innerHTML = `
+                ${iconHTML}
+                <div class="${contentClass} rounded-lg p-4 shadow-sm max-w-[85%] ${extraMargins}">
+                    ${formattedText}
+                </div>
+                ${isUser ? `<div class="bg-gray-200 rounded-full p-3 ml-3"><i class="fas fa-user text-gray-600"></i></div>` : ''}
+            `;
+            list.appendChild(div);
+            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+        }
+
+        function addLoader() {
+            const list = document.getElementById('messageList');
+            const div = document.createElement('div');
+            div.className = 'flex items-start message-loader';
+            div.innerHTML = `
+                <div class="bg-blue-100 rounded-full p-3 mr-3"><i class="fas fa-robot text-blue-600"></i></div>
+                <div class="bg-white border rounded-lg p-4 shadow-sm text-gray-800 flex items-center space-x-2">
+                    <div class="loader"></div> <span class="text-gray-500 text-sm">Agent is thinking and retrieving documents...</span>
+                </div>
+            `;
+            list.appendChild(div);
+            document.getElementById('chatBox').scrollTop = document.getElementById('chatBox').scrollHeight;
+        }
+
+        function removeLoader() {
+            const loaders = document.querySelectorAll('.message-loader');
+            loaders.forEach(l => l.remove());
+        }
+
+        async function ingestData() {
+            const btn = document.getElementById('ingestBtn');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<div class="loader mr-2"></div> Ingesting...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`${getApiUrl()}/ingest`, { method: 'POST' });
+                const data = await response.json();
+                if(data.status === 'error') {
+                    showSettingsMsg('Ingest failed: ' + data.message, 'text-red-600');
+                } else {
+                    showSettingsMsg(`Success! Ingested ${data.documents} documents.`, 'text-green-600');
+                }
+            } catch (error) {
+                showSettingsMsg('Connection error. Is the backend URL correct and running?', 'text-red-600');
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, true);
+            input.value = '';
+            input.disabled = true;
+            addLoader();
+
+            try {
+                const response = await fetch(`${getApiUrl()}/ask`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question: text })
+                });
+                
+                if(!response.ok) throw new Error('API Error');
+                
+                const data = await response.json();
+                removeLoader();
+                addMessage(data.answer);
+            } catch (error) {
+                removeLoader();
+                addMessage('⚠️ Sorry, I could not connect to the backend. Please make sure the API URL is correct in the Settings, and the backend is running.', false);
+            } finally {
+                input.disabled = false;
+                input.focus();
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>

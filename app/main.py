@@ -10,9 +10,19 @@ from .llm import embeddings
 from .retrieval import HybridRetriever
 
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(
     title="Advanced Agentic RAG Knowledge Assistant",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins (good for portfolio)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 retriever = None
