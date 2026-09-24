@@ -214,15 +214,24 @@
                 setTimeout(() => {
                     removeLoader();
                     
-                    const fakeAnswers = [
-                        "**[DEMO MODE]** Based on the **HR Employee Handbook** (Page 4), employees are entitled to 20 days of Paid Time Off (PTO) per year. \n\n*(Note: The live backend is currently asleep, so this is a simulated response!)*",
-                        "**[DEMO MODE]** According to the **IT Security Policy**, all passwords must be at least 12 characters long and rotated every 90 days.\n\n*(Note: The live backend is currently asleep, so this is a simulated response!)*",
-                        "**[DEMO MODE]** I found relevant information in the **Finance Expense Policy**. All travel reimbursements must be submitted within 30 days of the trip.\n\n*(Note: The live backend is currently asleep, so this is a simulated response!)*",
-                        "**[DEMO MODE]** The **Benefits Handbook** states that health insurance coverage begins on the first day of the month following your hire date.\n\n*(Note: The live backend is currently asleep, so this is a simulated response!)*"
-                    ];
+                    const lowerText = text.toLowerCase();
+                    let demoAnswer = "";
+
+                    if (lowerText.includes("leave") || lowerText.includes("pto") || lowerText.includes("vacation") || lowerText.includes("holiday")) {
+                        demoAnswer = "**[DEMO MODE]** Based on the **HR Leave Policy** (Page 2), employees are entitled to 20 days of Paid Time Off (PTO) per year, plus standard national holidays.\n\n*(Note: Simulated response since backend is offline!)*";
+                    } else if (lowerText.includes("password") || lowerText.includes("it") || lowerText.includes("security")) {
+                        demoAnswer = "**[DEMO MODE]** According to the **IT Security Policy**, all employee passwords must be at least 12 characters long and rotated every 90 days.\n\n*(Note: Simulated response since backend is offline!)*";
+                    } else if (lowerText.includes("expense") || lowerText.includes("travel") || lowerText.includes("finance") || lowerText.includes("reimburse")) {
+                        demoAnswer = "**[DEMO MODE]** I found relevant information in the **Finance Expense Policy**. All travel reimbursements must be submitted with receipts within 30 days of the trip.\n\n*(Note: Simulated response since backend is offline!)*";
+                    } else if (lowerText.includes("hours") || lowerText.includes("work") || lowerText.includes("time")) {
+                        demoAnswer = "**[DEMO MODE]** The **HR Employee Handbook** states that standard working hours are from 9:00 AM to 5:00 PM in your local time zone, with a flexible 1-hour lunch break.\n\n*(Note: Simulated response since backend is offline!)*";
+                    } else if (lowerText.includes("health") || lowerText.includes("benefit") || lowerText.includes("insurance")) {
+                        demoAnswer = "**[DEMO MODE]** The **Benefits Handbook** states that health insurance coverage begins on the first day of the month following your official hire date.\n\n*(Note: Simulated response since backend is offline!)*";
+                    } else {
+                        demoAnswer = "**[DEMO MODE]** I have searched the knowledge base. The policies indicate that for specific inquiries not outlined in the standard handbooks, you should contact your direct manager or the HR department.\n\n*(Note: Simulated response since backend is offline!)*";
+                    }
                     
-                    const randomAnswer = fakeAnswers[Math.floor(Math.random() * fakeAnswers.length)];
-                    addMessage(randomAnswer);
+                    addMessage(demoAnswer);
                 }, 1500);
             } finally {
                 input.disabled = false;
