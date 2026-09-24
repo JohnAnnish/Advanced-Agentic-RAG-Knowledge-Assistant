@@ -1,0 +1,25 @@
+services:
+  # The FastAPI Web Service
+  - type: web
+    name: agentic-rag-api
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false # Render will prompt you to enter this in the dashboard
+      - key: DATABASE_URL
+        value: "postgresql://dummy_user:dummy_pass@localhost:5432/dummy_db" # Required by config but unused due to FAISS fallback
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: rag-redis
+          property: connectionString
+
+  # The Redis Cache
+  - type: redis
+    name: rag-redis
+    plan: free
+    region: oregon
+    ipAllowList: [] # Ensures Redis is only accessible internally by the API
